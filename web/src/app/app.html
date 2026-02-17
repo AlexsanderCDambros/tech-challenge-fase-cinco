@@ -1,0 +1,20 @@
+<mat-toolbar color="secondary" class="background-color: var(--mat-tertiary-color) sombra">
+    <h1>MindEase</h1>
+</mat-toolbar>
+
+<div class="template">
+  <div class="d-flex col gap-16 pw-16 sombra">
+    <div class="d-flex row align-items-center justify-content-between gap-8">
+      <span>Tema</span>
+      <app-theme-toggle></app-theme-toggle>
+    </div>
+    <div class="d-flex row align-items-center justify-content-between gap-8">
+      <span>Modo foco</span>
+      <app-modo-foco></app-modo-foco>
+    </div>
+    <app-font-size-slider></app-font-size-slider>
+  </div>
+  <main style="width: 100%; padding: 20px;">
+    <router-outlet />
+  </main>
+</div>

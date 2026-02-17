@@ -1,0 +1,36 @@
+@if (!(modoFocoService.modoFocoAtivo$ | async)) {
+  <div class="container-cabecalho">
+    <app-adicionar-tarefa></app-adicionar-tarefa>
+    <app-pomodoro-timer></app-pomodoro-timer>
+  </div>
+} @else {
+  <div class="d-flex justify-content-center">
+    <app-pomodoro-timer></app-pomodoro-timer>
+  </div>
+}
+
+@if (tarefasService.tarefas$ | async; as tarefas) {
+  <div
+    [ngClass]="{
+      'container-colunas': !(modoFocoService.modoFocoAtivo$ | async),
+      'container-colunas-foco': modoFocoService.modoFocoAtivo$ | async }"
+    style="margin-top: 16px;"
+  >
+    @if (!(modoFocoService.modoFocoAtivo$ | async)) {
+      <app-coluna-status
+        [status]="'A fazer'"
+        [tarefas]="tarefas"
+      ></app-coluna-status>
+    }
+    <app-coluna-status
+      [status]="'Em andamento'"
+      [tarefas]="tarefas"
+    ></app-coluna-status>
+    @if (!(modoFocoService.modoFocoAtivo$ | async)) {
+      <app-coluna-status
+        [status]="'Finalizada'"
+        [tarefas]="tarefas"
+      ></app-coluna-status>
+    }
+  </div>
+}

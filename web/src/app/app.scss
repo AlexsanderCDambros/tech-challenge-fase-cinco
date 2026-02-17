@@ -1,0 +1,9 @@
+.template {
+  display: flex;
+  flex-direction: row;
+  min-height: calc(100vh - 64px);
+}
+
+.w-100 {
+  width: 100%;
+}

@@ -1,0 +1,48 @@
+<mat-card>
+  <mat-card-header>
+    <mat-card-title>{{ tarefa().titulo }}</mat-card-title>
+  </mat-card-header>
+  <mat-card-content>
+    <pre>{{ tarefa().descricao }}</pre>
+  </mat-card-content>
+  @if (!(focoService.modoFocoAtivo$ | async)) {
+    <mat-card-actions class="w-100">
+      @if(tarefa().status === 'A fazer') {
+        <button
+          matButton
+          (click)="tarefasService.alterarStatusTarefa(tarefa().id, 'Em andamento')"
+        >{{'>'}}</button>
+        <button
+          matButton
+          (click)="tarefasService.alterarStatusTarefa(tarefa().id, 'Finalizada')"
+        >{{'>>'}}</button>
+
+      }
+      @if(tarefa().status === 'Em andamento') {
+        <button
+          matButton
+          (click)="tarefasService.alterarStatusTarefa(tarefa().id, 'A fazer')"
+        >{{'<'}}</button>
+        <button
+          matButton
+          (click)="tarefasService.alterarStatusTarefa(tarefa().id, 'Finalizada')"
+        >{{'>'}}</button>
+
+      }
+      @if(tarefa().status === 'Finalizada') {
+        <button
+          matButton
+          (click)="tarefasService.alterarStatusTarefa(tarefa().id, 'A fazer')"
+        >{{'<<'}}</button>
+        <button
+          matButton
+          (click)="tarefasService.alterarStatusTarefa(tarefa().id, 'Em andamento')"
+        >{{'<'}}</button>
+      }
+      <button
+        matButton
+        (click)="tarefasService.excluirTarefa(tarefa().id)"
+      >Excluir</button>
+    </mat-card-actions>
+  }
+</mat-card>

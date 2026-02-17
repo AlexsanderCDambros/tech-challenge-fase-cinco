@@ -1,0 +1,12 @@
+<mat-card>
+  <mat-card-header>
+    <mat-card-title>{{ status() }}</mat-card-title>
+  </mat-card-header>
+  <mat-card-content>
+    @for (tarefa of tarefasFiltradas(); track tarefa.id) {
+      <div style="margin-top: 16px;">
+        <app-tarefa [tarefa]="tarefa"></app-tarefa>
+      </div>
+    }
+  </mat-card-content>
+</mat-card>

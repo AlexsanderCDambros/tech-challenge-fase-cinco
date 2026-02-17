@@ -1,0 +1,22 @@
+.container {
+  margin: 0 auto;
+}
+
+.form-card {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.full-width {
+  width: 100%;
+  margin-bottom: 4px;
+}
+
+.button-group {
+  display: flex;
+  gap: 12px;
+  margin-top: 8px;
+
+  button {
+    flex: 1;
+  }
+}

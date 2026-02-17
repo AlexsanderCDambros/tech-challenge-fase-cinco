@@ -1,0 +1,25 @@
+<div class="pomodoro-container">
+  <mat-card>
+    <mat-card-header>
+      <mat-card-title>Pomodoro Timer</mat-card-title>
+    </mat-card-header>
+
+    <mat-card-content>
+      <div class="d-flex justify-content-center" style="margin-top: 16px; margin-bottom: 16px;">
+        <span class="text-xlarge">{{ formatTime(timer()) }}</span>
+      </div>
+
+      <div class="controls">
+        <button mat-raised-button color="primary" (click)="toggle()">
+          <mat-icon>{{ isRunning() ? 'pause' : 'play_arrow' }}</mat-icon>
+          {{ isRunning() ? 'Pausar' : 'Iniciar' }}
+        </button>
+
+        <button mat-raised-button color="warn" (click)="reset()">
+          <mat-icon>restart_alt</mat-icon>
+          Resetar
+        </button>
+      </div>
+    </mat-card-content>
+  </mat-card>
+</div>

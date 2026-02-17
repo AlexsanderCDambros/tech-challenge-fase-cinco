@@ -1,0 +1,109 @@
+
+// Include theming for Angular Material with `mat.theme()`.
+// This Sass mixin will define CSS variables that are used for styling Angular Material
+// components according to the Material 3 design spec.
+// Learn more about theming and how to use it for your application's
+// custom components at https://material.angular.dev/guide/theming
+@use '@angular/material' as mat;
+
+html {
+  height: 100%;
+  @include mat.theme((
+    color: (
+      primary: mat.$magenta-palette,
+      tertiary: mat.$violet-palette,
+    ),
+    typography: Roboto,
+    density: 0,
+  ));
+}
+
+body {
+  // Default the application to a light color theme. This can be changed to
+  // `dark` to enable the dark color theme, or to `light dark` to defer to the
+  // user's system settings.
+  color-scheme: light;
+
+  // Set a default background, font and text colors for the application using
+  // Angular Material's system-level CSS variables. Learn more about these
+  // variables at https://material.angular.dev/guide/system-variables
+  background-color: var(--mat-sys-surface);
+  color: var(--mat-sys-on-surface);
+  font: var(--mat-sys-body-medium);
+
+  // Reset the user agent margin.
+  margin: 0;
+  height: 100%;
+}
+
+.mat-typography {
+  h1, h2, h3, h4, h5, h6, p, span, div {
+    font-size: inherit;
+  }
+}
+
+// Ajustes responsivos para diferentes tamanhos de fonte
+@media (max-width: 600px) {
+  :root {
+    font-size: 14px; // Reduz um pouco em mobile
+  }
+}
+
+// Classes utilitárias para tamanhos relativos
+.text-small {
+  font-size: 0.875rem; // 14px se base for 16px
+}
+
+.text-large {
+  font-size: 1.125rem; // 18px se base for 16px
+}
+
+.text-xlarge {
+  font-size: 1.25rem; // 20px se base for 16px
+}
+/* You can add global styles to this file, and also import other style files */
+
+
+.d-flex {
+  display: flex;
+}
+
+.row {
+  flex-direction: row;
+}
+
+.col {
+  flex-direction: column;
+}
+
+.justify-content-center {
+  justify-content: center;
+}
+
+.justify-content-between {
+  justify-content: space-between;
+}
+
+.justify-content-around {
+  justify-content: space-around;
+}
+
+.align-items-center {
+  align-items: center;
+}
+
+.gap-8 {
+  gap: 8px;
+}
+
+.gap-16 {
+  gap: 16px;
+}
+
+.pw-16 {
+  padding: 16px;
+}
+
+.sombra {
+  box-shadow: 2px 2px 4px color-mix(in srgb, var(--mat-sys-on-surface) 30%, transparent);
+}
