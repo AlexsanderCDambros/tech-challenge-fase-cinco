@@ -1,70 +1,91 @@
 import 'package:flutter/material.dart';
+import 'package:mobile/features/focus_mode/focus_mode_controller.dart';
+import 'package:mobile/features/tasks/models/task.dart';
+import 'package:mobile/features/tasks/widgets/task_card.dart';
 import 'package:provider/provider.dart';
-import '../controller/task_controller.dart';
-import '../models/task.dart';
+
 import '../../../core/theme/theme_controller.dart';
 import '../../../features/accessibility/font_size_controller.dart';
+import '../../../features/pomodoro/pomodoro_widget.dart';
+import '../controller/task_controller.dart';
 
 class TasksPage extends StatelessWidget {
   const TasksPage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final controller = Provider.of<TaskController>(context);
+    final focusMode = context.watch<FocusModeController>().isFocusMode;
 
     return Scaffold(
-      appBar: AppBar(title: const Text("MindEase")),
+      appBar: AppBar(title: const Text("FocusBoard")),
 
+      // ===========================
+      // DRAWER
+      // ===========================
       drawer: Drawer(
-        child: Consumer2<ThemeController, FontSizeController>(
-          builder: (context, themeController, fontController, _) {
-            return ListView(
-              padding: EdgeInsets.zero,
-              children: [
-                const DrawerHeader(
-                  child: Text("Configurações", style: TextStyle(fontSize: 20)),
-                ),
+        child:
+            Consumer3<ThemeController, FontSizeController, FocusModeController>(
+              builder:
+                  (
+                    context,
+                    themeController,
+                    fontController,
+                    focusController,
+                    _,
+                  ) {
+                    return ListView(
+                      padding: EdgeInsets.zero,
+                      children: [
+                        const DrawerHeader(
+                          child: Text(
+                            "Configurações",
+                            style: TextStyle(fontSize: 20),
+                          ),
+                        ),
 
-                /// Dark Mode
-                SwitchListTile(
-                  title: const Text("Modo Escuro"),
-                  value: themeController.isDark,
-                  onChanged: (value) {
-                    themeController.toggle(value);
+                        /// 🌙 Dark Mode
+                        SwitchListTile(
+                          title: const Text("Modo Escuro"),
+                          value: themeController.isDark,
+                          onChanged: themeController.toggle,
+                          secondary: const Icon(Icons.dark_mode),
+                        ),
+
+                        /// 🎯 Modo Foco (não persistente)
+                        SwitchListTile(
+                          title: const Text("Modo Foco"),
+                          value: focusController.isFocusMode,
+                          onChanged: focusController.toggle,
+                          secondary: const Icon(Icons.center_focus_strong),
+                        ),
+
+                        const Divider(),
+
+                        /// 🔠 Controle de Fonte
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 16),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Text(
+                                "Tamanho da Fonte",
+                                style: TextStyle(fontWeight: FontWeight.bold),
+                              ),
+                              Slider(
+                                value: fontController.scale,
+                                min: 0.8,
+                                max: 1.5,
+                                divisions: 7,
+                                label: fontController.scale.toStringAsFixed(1),
+                                onChanged: fontController.setScale,
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    );
                   },
-                  secondary: const Icon(Icons.dark_mode),
-                ),
-
-                const Divider(),
-
-                /// Controle de Fonte
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        "Tamanho da Fonte",
-                        style: TextStyle(fontWeight: FontWeight.bold),
-                      ),
-
-                      Slider(
-                        value: fontController.scale,
-                        min: 0.8,
-                        max: 1.5,
-                        divisions: 7,
-                        label: fontController.scale.toStringAsFixed(1),
-                        onChanged: (value) {
-                          fontController.setScale(value);
-                        },
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            );
-          },
-        ),
+            ),
       ),
 
       floatingActionButton: FloatingActionButton(
@@ -72,187 +93,134 @@ class TasksPage extends StatelessWidget {
         child: const Icon(Icons.add),
       ),
 
-      body: SingleChildScrollView(
-        scrollDirection: Axis.horizontal,
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: TaskStatus.values.map((status) {
-            final tasks = controller.tasksByStatus(status);
+      // ===========================
+      // BODY DINÂMICO
+      // ===========================
+      body: Column(
+        children: [
+          if (focusMode) const PomodoroWidget(),
 
-            return Container(
-              width: 320,
-              margin: const EdgeInsets.all(8),
-              child: Column(
-                children: [
-                  /// Cabeçalho da coluna
-                  Container(
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: Theme.of(context).colorScheme.primaryContainer,
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Column(
-                      children: [
-                        Text(
-                          status.name == 'todo' ? "A Fazer" : status.name == 'doing' ? "Fazendo" : "Feito",
-                          style: const TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        Text("${tasks.length} tarefas"),
-                      ],
-                    ),
-                  ),
+          Expanded(
+            child: focusMode
+                ? _buildFocusBoard(context)
+                : _buildFullBoard(context),
+          ),
 
-                  const SizedBox(height: 8),
+          if (!focusMode) const PomodoroWidget(),
+        ],
+      ),
+    );
+  }
 
-                  /// Lista de tarefas
-                  Expanded(
-                    child: tasks.isEmpty
-                        ? const Center(
-                            child: Text(
-                              "Sem tarefas",
-                              style: TextStyle(color: Colors.grey),
-                            ),
-                          )
-                        : ListView.builder(
-                            shrinkWrap: true,
-                            itemCount: tasks.length,
-                            itemBuilder: (context, index) {
-                              final task = tasks[index];
+  // ===========================
+  // BOARD COMPLETO (Modo Normal)
+  // ===========================
+  Widget _buildFullBoard(BuildContext context) {
+    final controller = context.watch<TaskController>();
 
-                              return Card(
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                                elevation: 3,
-                                margin: const EdgeInsets.symmetric(vertical: 6),
-                                child: ListTile(
-                                  title: Text(
-                                    task.title,
-                                    style: const TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                  subtitle: Text(task.description),
+    final todo = controller.tasks
+        .where((t) => t.status == TaskStatus.todo)
+        .toList();
 
-                                  /// Menu mover + excluir
-                                  trailing: Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      PopupMenuButton<TaskStatus>(
-                                        icon: const Icon(Icons.swap_horiz),
-                                        onSelected: (newStatus) {
-                                          controller.changeStatus(
-                                            task,
-                                            newStatus,
-                                          );
-                                        },
-                                        itemBuilder: (context) => TaskStatus
-                                            .values
-                                            .where((s) => s != status)
-                                            .map(
-                                              (statusOption) => PopupMenuItem(
-                                                value: statusOption,
-                                                child: Text(
-                                                  "Mover para ${statusOption.name == 'todo' ? "A Fazer" : statusOption.name == 'doing' ? "Fazendo" : "Feito"}",
-                                                ),
-                                              ),
-                                            )
-                                            .toList(),
-                                      ),
-                                      IconButton(
-                                        icon: const Icon(
-                                          Icons.delete,
-                                          color: Colors.red,
-                                        ),
-                                        onPressed: () {
-                                          controller.removeTask(task);
-                                        },
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              );
-                            },
-                          ),
-                  ),
-                ],
+    final inProgress = controller.tasks
+        .where((t) => t.status == TaskStatus.doing)
+        .toList();
+
+    final done = controller.tasks
+        .where((t) => t.status == TaskStatus.done)
+        .toList();
+
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildColumn("Todo", todo),
+          _buildColumn("In Progress", inProgress),
+          _buildColumn("Done", done),
+        ],
+      ),
+    );
+  }
+
+  // ===========================
+  // APENAS IN PROGRESS (Modo Foco)
+  // ===========================
+  Widget _buildFocusBoard(BuildContext context) {
+    final controller = context.watch<TaskController>();
+
+    final inProgress = controller.tasks
+        .where((t) => t.status == TaskStatus.doing)
+        .toList();
+
+    return Center(
+      child: SizedBox(width: 400, child: _buildColumn("Em Foco", inProgress)),
+    );
+  }
+
+  // ===========================
+  // COLUNA PADRÃO
+  // ===========================
+  Widget _buildColumn(String title, List<Task> tasks) {
+    return SizedBox(
+      width: 320,
+      child: Card(
+        margin: const EdgeInsets.all(12),
+        child: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(12),
+              child: Text(
+                title,
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
-            );
-          }).toList(),
+            ),
+            Expanded(
+              child: ListView.builder(
+                itemCount: tasks.length,
+                itemBuilder: (context, index) {
+                  return TaskCard(task: tasks[index]);
+                },
+              ),
+            ),
+          ],
         ),
       ),
     );
   }
 
-  /// Modal para criar tarefa
+  // ===========================
+  // MODAL NOVA TASK
+  // ===========================
   void _showAddTask(BuildContext context) {
-    final titleController = TextEditingController();
-    final descController = TextEditingController();
+    final controller = context.read<TaskController>();
+    final textController = TextEditingController();
 
-    showModalBottomSheet(
+    showDialog(
       context: context,
-      isScrollControlled: true,
-      builder: (_) {
-        return Padding(
-          padding: EdgeInsets.only(
-            left: 16,
-            right: 16,
-            top: 16,
-            bottom: MediaQuery.of(context).viewInsets.bottom + 16,
+      builder: (_) => AlertDialog(
+        title: const Text("Nova Tarefa"),
+        content: TextField(
+          controller: textController,
+          decoration: const InputDecoration(hintText: "Digite a tarefa"),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text("Cancelar"),
           ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Text(
-                "Nova Tarefa",
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 16),
-
-              TextField(
-                controller: titleController,
-                decoration: const InputDecoration(
-                  labelText: "Título",
-                  border: OutlineInputBorder(),
-                ),
-              ),
-
-              const SizedBox(height: 12),
-
-              TextField(
-                controller: descController,
-                decoration: const InputDecoration(
-                  labelText: "Descrição",
-                  border: OutlineInputBorder(),
-                ),
-              ),
-
-              const SizedBox(height: 16),
-
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: () {
-                    if (titleController.text.isNotEmpty) {
-                      Provider.of<TaskController>(
-                        context,
-                        listen: false,
-                      ).addTask(titleController.text, descController.text);
-
-                      Navigator.pop(context);
-                    }
-                  },
-                  child: const Text("Adicionar"),
-                ),
-              ),
-            ],
+          ElevatedButton(
+            onPressed: () {
+              controller.addTask(textController.text, textController.text);
+              Navigator.pop(context);
+            },
+            child: const Text("Adicionar"),
           ),
-        );
-      },
+        ],
+      ),
     );
   }
 }

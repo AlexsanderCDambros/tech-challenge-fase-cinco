@@ -52,4 +52,9 @@ class TaskController extends ChangeNotifier {
     saveTasks();
     notifyListeners();
   }
+
+  void updateStatus(Task task, TaskStatus newStatus) {
+  task.status = newStatus;
+  notifyListeners();
+}
 }

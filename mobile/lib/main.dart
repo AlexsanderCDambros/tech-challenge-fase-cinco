@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:mobile/features/accessibility/font_size_controller.dart';
+import 'package:mobile/features/focus_mode/focus_mode_controller.dart';
+import 'package:mobile/features/pomodoro/pomodoro_controller.dart';
 import 'package:provider/provider.dart';
 import 'core/theme/theme_controller.dart';
 import 'features/tasks/controller/task_controller.dart';
@@ -19,6 +21,8 @@ class FocusBoardApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => ThemeController()),
         ChangeNotifierProvider(create: (_) => TaskController()),
         ChangeNotifierProvider(create: (_) => FontSizeController()),
+        ChangeNotifierProvider(create: (_) => PomodoroController()),
+        ChangeNotifierProvider(create: (_) => FocusModeController()),
       ],
       child: Consumer2<ThemeController, FontSizeController>(
         builder: (context, themeController, fontController, _) {
