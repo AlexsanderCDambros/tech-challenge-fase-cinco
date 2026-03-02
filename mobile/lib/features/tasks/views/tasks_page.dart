@@ -135,9 +135,9 @@ class TasksPage extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _buildColumn("Todo", todo),
-          _buildColumn("In Progress", inProgress),
-          _buildColumn("Done", done),
+          _buildColumn("A Fazer", todo),
+          _buildColumn("Fazendo", inProgress),
+          _buildColumn("Feito", done),
         ],
       ),
     );
@@ -197,15 +197,26 @@ class TasksPage extends StatelessWidget {
   // ===========================
   void _showAddTask(BuildContext context) {
     final controller = context.read<TaskController>();
-    final textController = TextEditingController();
+    final titleController = TextEditingController();
+    final descriptionController = TextEditingController();
 
     showDialog(
       context: context,
       builder: (_) => AlertDialog(
         title: const Text("Nova Tarefa"),
-        content: TextField(
-          controller: textController,
-          decoration: const InputDecoration(hintText: "Digite a tarefa"),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: titleController,
+              decoration: const InputDecoration(hintText: "Digite a tarefa"),
+            ),
+            const SizedBox(height: 8),
+            TextField(
+              controller: descriptionController,
+              decoration: const InputDecoration(hintText: "Digite a descrição"),
+            ),
+          ],
         ),
         actions: [
           TextButton(
@@ -214,7 +225,7 @@ class TasksPage extends StatelessWidget {
           ),
           ElevatedButton(
             onPressed: () {
-              controller.addTask(textController.text, textController.text);
+              controller.addTask(titleController.text, descriptionController.text);
               Navigator.pop(context);
             },
             child: const Text("Adicionar"),

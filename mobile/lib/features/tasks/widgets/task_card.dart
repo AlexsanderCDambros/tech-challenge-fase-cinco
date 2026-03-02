@@ -38,15 +38,19 @@ class TaskCard extends StatelessWidget {
                 itemBuilder: (_) => const [
                   PopupMenuItem(
                     value: TaskStatus.todo,
-                    child: Text("Mover para Todo"),
+                    child: Text("Mover para A Fazer"),
                   ),
                   PopupMenuItem(
                     value: TaskStatus.doing,
-                    child: Text("Mover para In Progress"),
+                    child: Text("Mover para Fazendo"),
                   ),
                   PopupMenuItem(
                     value: TaskStatus.done,
-                    child: Text("Mover para Done"),
+                    child: Text("Mover para Feito"),
+                  ),
+                  PopupMenuItem(
+                    value: TaskStatus.deleted,
+                    child: Text("Excluir tarefa"),
                   ),
                 ],
               ),

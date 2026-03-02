@@ -54,7 +54,12 @@ class TaskController extends ChangeNotifier {
   }
 
   void updateStatus(Task task, TaskStatus newStatus) {
-  task.status = newStatus;
-  notifyListeners();
-}
+    if (newStatus == TaskStatus.deleted) {
+      removeTask(task);
+      return;
+    }
+    task.status = newStatus;
+    saveTasks();
+    notifyListeners();
+  }
 }

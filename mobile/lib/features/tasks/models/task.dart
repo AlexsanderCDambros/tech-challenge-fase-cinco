@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-enum TaskStatus { todo, doing, done }
+enum TaskStatus { todo, doing, done, deleted }
 
 class Task {
   final String id;
