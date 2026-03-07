@@ -1,5 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { App } from './app';
+import { ThemeService } from './shared/tema/theme.service';
+import { vi } from 'vitest';
 
 function ensureMatchMedia() {
   if (!window.matchMedia) {
@@ -17,20 +19,38 @@ function ensureMatchMedia() {
 }
 
 describe('App', () => {
+  let initSpy: ReturnType<typeof vi.fn>;
+  let getCurrentThemeSpy: ReturnType<typeof vi.fn>;
+
   beforeAll(() => {
     ensureMatchMedia();
   });
 
   beforeEach(async () => {
+    initSpy = vi.fn();
+    getCurrentThemeSpy = vi.fn(() => 'light');
+
     await TestBed.configureTestingModule({
       imports: [App],
-      providers: []
+      providers: [
+        {
+          provide: ThemeService,
+          useValue: {
+            initTheme: initSpy,
+            getCurrentTheme: getCurrentThemeSpy,
+            resetToSystemPreference: vi.fn(),
+            setTheme: vi.fn()
+          }
+        }
+      ]
     }).compileComponents();
   });
 
-  it('should create the app', () => {
+  it('should create the app and initialize theme', () => {
     const fixture = TestBed.createComponent(App);
-    const app = fixture.componentInstance;
-    expect(app).toBeTruthy();
+    fixture.detectChanges();
+
+    expect(fixture.componentInstance).toBeTruthy();
+    expect(initSpy).toHaveBeenCalled();
   });
 });
