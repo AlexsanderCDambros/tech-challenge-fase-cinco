@@ -4,18 +4,31 @@ import { ThemeService } from './shared/tema/theme.service';
 import { vi } from 'vitest';
 
 function ensureMatchMedia() {
-  if (!window.matchMedia) {
-    (window as any).matchMedia = () => ({
+  // jsdom provides matchMedia but its MediaQueryList uses the modern
+  // addEventListener/removeEventListener API only. Angular CDK still uses
+  // the legacy addListener/removeListener methods in some versions.
+  const originalMatchMedia = window.matchMedia;
+
+  (window as any).matchMedia = (query: string) => {
+    const mql = originalMatchMedia ? originalMatchMedia.call(window, query) : {
       matches: false,
-      media: '',
+      media: query,
       onchange: null,
       addEventListener: () => {},
       removeEventListener: () => {},
-      addListener: () => {},
-      removeListener: () => {},
       dispatchEvent: () => false,
-    });
-  }
+    };
+
+    if (!(mql as any).addListener) {
+      (mql as any).addListener = (mql as any).addEventListener?.bind(mql) ?? (() => {});
+    }
+
+    if (!(mql as any).removeListener) {
+      (mql as any).removeListener = (mql as any).removeEventListener?.bind(mql) ?? (() => {});
+    }
+
+    return mql;
+  };
 }
 
 describe('App', () => {
